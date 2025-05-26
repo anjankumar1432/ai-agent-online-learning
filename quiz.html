@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Theory Tutor & Quiz</title>
+    <style>
+    /* Quiz Box Styles */
+    .quiz-question-box {
+        background: #f0f8ff;
+        margin-bottom: 15px;
+        padding: 15px;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
+    }
+
+    /* Quiz Options Styles */
+    .quiz-options label {
+        display: block;
+        margin-bottom: 10px;
+        cursor: pointer;
+        font-size: 17px;
+        padding: 6px 10px;
+        border-radius: 6px;
+        transition: background 0.2s;
+    }
+    .quiz-options label:hover {
+        background: #e3f2fd;
+    }
+    .quiz-options input[type="radio"] {
+        margin-right: 10px;
+        transform: scale(1.2);
+        accent-color: #3498db;
+    }
+
+    /* Quiz Navigation Buttons */
+    .quiz-navigation {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+    }
+    .quiz-navigation button {
+        flex: 1;
+        padding: 10px 0;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        background: #3498db;
+        color: #fff;
+        font-weight: bold;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .quiz-navigation button:hover {
+        background: #217dbb;
+    }
+    .quiz-navigation button:disabled {
+        background: #bdc3c7;
+        cursor: not-allowed;
+    }
+
+    /* Quiz Results */
+    .quiz-results {
+        background: #e6ffe6;
+        font-weight: bold;
+        text-align: center;
+        padding: 15px;
+        margin-top: 20px;
+        border-radius: 8px;
+        color: #2c3e50;
+    }
+
+    /* No Quiz Message */
+    #noQuizMessage {
+        text-align: center;
+        color: #e74c3c;
+        margin-top: 20px;
+        font-weight: bold;
+    }
+    </style>
+</head>
+<body>
+    <div class="quiz-container" style="max-width:600px;margin:40px auto;">
+        <h2>AI Theory Tutor Quiz</h2>
+        <div style="margin-bottom:20px;">
+            <label for="quizSubject">Select Subject:</label>
+            <select id="quizSubject">
+                <option value="Physics">Physics</option>
+                <option value="Math">Math</option>
+            </select>
+            <label for="quizTopic" style="margin-top:10px;display:block;">Select Topic:</label>
+            <select id="quizTopic"></select>
+        </div>
+        <div id="quizArea">
+            <div class="quiz-question-box" id="quizQuestionBox" style="display:none;">
+                <p id="quizQuestion"></p>
+                <div id="quizOptions" class="quiz-options"></div>
+            </div>
+            <div class="quiz-navigation" id="quizNav" style="display:none;">
+                <button id="nextQuestionBtn">Next Question</button>
+                <button id="submitQuizBtn" style="display:none;">Submit Test</button>
+            </div>
+            <div class="quiz-results" id="quizResults" style="display:none;"></div>
+            <p id="noQuizMessage" style="display:none;">No quiz available for this topic yet.</p>
+        </div>
+    </div>
+    <script>
+    // Quiz data
+    const quizContent = {
+      Physics: {
+        "Newton's Laws": [
+          {
+            question: "Which of Newton's laws states that for every action, there is an equal and opposite reaction?",
+            options: ["First Law", "Second Law", "Third Law", "Law of Universal Gravitation"],
+            answer: "Third Law"
+          },
+          {
+            question: "What is the relationship defined by Newton's second law?",
+            options: ["F = mv", "F = ma", "E = mc^2", "P = IV"],
+            answer: "F = ma"
+          },
+          {
+            question: "According to Newton's first law, an object in motion will stay in motion unless acted upon by a what?",
+            options: ["Inertia", "Force", "Momentum", "Velocity"],
+            answer: "Force"
+          },
+          {
+            question: "If you push a wall, the wall pushes back on you with equal and opposite force. This illustrates which law?",
+            options: ["First Law", "Second Law", "Third Law", "Law of Conservation of Energy"],
+            answer: "Third Law"
+          },
+          {
+            question: "The tendency of an object to resist changes in its state of motion is called:",
+            options: ["Force", "Acceleration", "Inertia", "Gravity"],
+            answer: "Inertia"
+          }
+        ],
+        Gravity: [
+          {
+            question: "What force attracts two bodies toward each other?",
+            options: ["Friction", "Tension", "Gravity", "Normal Force"],
+            answer: "Gravity"
+          },
+          {
+            question: "The force of gravity depends on the mass of the objects and what other factor?",
+            options: ["Their color", "Their temperature", "Their distance", "Their velocity"],
+            answer: "Their distance"
+          },
+          {
+            question: "Who is credited with formulating the law of universal gravitation?",
+            options: ["Albert Einstein", "Isaac Newton", "Galileo Galilei", "Johannes Kepler"],
+            answer: "Isaac Newton"
+          },
+          {
+            question: "What is the approximate acceleration due to gravity on Earth's surface?",
+            options: ["9.8 m/s²", "1.6 m/s²", "0 m/s²", "3.7 m/s²"],
+            answer: "9.8 m/s²"
+          },
+          {
+            question: "If the distance between two objects doubles, how does the gravitational force between them change?",
+            options: ["It doubles", "It halves", "It quarters", "It quadruples"],
+            answer: "It quarters"
+          }
+        ],
+        Thermodynamics: [
+          {
+            question: "Which law of thermodynamics states the conservation of energy?",
+            options: ["First Law", "Second Law", "Third Law", "Zeroth Law"],
+            answer: "First Law"
+          },
+          {
+            question: "What concept does the second law of thermodynamics introduce?",
+            options: ["Energy", "Work", "Heat", "Entropy"],
+            answer: "Entropy"
+          },
+          {
+            question: "The state at which a system has minimum entropy is reached at:",
+            options: ["Boiling point", "Freezing point", "Absolute zero", "Room temperature"],
+            answer: "Absolute zero"
+          },
+          {
+            question: "Which of the following is an example of heat transfer by conduction?",
+            options: ["Sunlight warming the Earth", "Water boiling in a kettle", "Heating a room with a fireplace", "Touching a hot stove"],
+            answer: "Touching a hot stove"
+          },
+          {
+            question: "A perfectly efficient heat engine is theorized by which of the following?",
+            options: ["Carnot cycle", "Otto cycle", "Diesel cycle", "Rankine cycle"],
+            answer: "Carnot cycle"
+          }
+        ],
+        Optics: [
+          {
+            question: "Which phenomenon is the bending of light as it passes from one medium to another?",
+            options: ["Reflection", "Refraction", "Diffraction", "Absorption"],
+            answer: "Refraction"
+          },
+          {
+            question: "What instrument uses lenses to magnify objects?",
+            options: ["Telescope", "Microscope", "Periscope", "All of the above"],
+            answer: "All of the above"
+          },
+          {
+            question: "The bouncing back of light when it strikes a surface is called:",
+            options: ["Refraction", "Absorption", "Reflection", "Dispersion"],
+            answer: "Reflection"
+          },
+          {
+            question: "Which color of visible light has the shortest wavelength?",
+            options: ["Red", "Green", "Blue", "Violet"],
+            answer: "Violet"
+          },
+          {
+            question: "A converging lens is also known as a:",
+            options: ["Concave lens", "Diverging lens", "Convex lens", "Plano-concave lens"],
+            answer: "Convex lens"
+          }
+        ],
+        Electromagnetism: [
+          {
+            question: "The interaction of electric currents or fields and magnetic fields is known as?",
+            options: ["Hydrodynamics", "Thermodynamics", "Electromagnetism", "Quantum Mechanics"],
+            answer: "Electromagnetism"
+          },
+          {
+            question: "Which set of equations describes the behavior of electric and magnetic fields?",
+            options: ["Newton's Laws", "Maxwell's Equations", "Einstein's Field Equations", "Schrödinger Equation"],
+            answer: "Maxwell's Equations"
+          },
+          {
+            question: "What unit is used to measure electric current?",
+            options: ["Volt", "Ohm", "Ampere", "Watt"],
+            answer: "Ampere"
+          },
+          {
+            question: "A material that does not allow electric current to flow easily through it is called a(n):",
+            options: ["Conductor", "Semiconductor", "Insulator", "Superconductor"],
+            answer: "Insulator"
+          },
+          {
+            question: "The phenomenon where a changing magnetic field induces an electromotive force is called:",
+            options: ["Magnetization", "Electrolysis", "Electromagnetic Induction", "Capacitance"],
+            answer: "Electromagnetic Induction"
+          }
+        ]
+      },
+      Math: {
+        Algebra: [
+          {
+            question: "What is algebra primarily concerned with?",
+            options: ["Numbers only", "Shapes and sizes", "Symbols and their manipulation", "Statistical data"],
+            answer: "Symbols and their manipulation"
+          },
+          {
+            question: "In the equation 2x + 5 = 11, what is the value of x?",
+            options: ["2", "3", "6", "8"],
+            answer: "3"
+          },
+          {
+            question: "What is the result of (a + b)²?",
+            options: ["a² + b²", "a² + 2ab + b²", "a² - b²", "a² + ab + b²"],
+            answer: "a² + 2ab + b²"
+          },
+          {
+            question: "Solve for y: 3y - 7 = 8",
+            options: ["3", "4", "5", "6"],
+            answer: "5"
+          },
+          {
+            question: "What is the term for a mathematical statement that two expressions are equal?",
+            options: ["Inequality", "Expression", "Equation", "Formula"],
+            answer: "Equation"
+          }
+        ],
+        Geometry: [
+          {
+            question: "Which of these is NOT a fundamental concept in geometry?",
+            options: ["Point", "Line", "Plane", "Time"],
+            answer: "Time"
+          },
+          {
+            question: "What is the sum of angles in a triangle?",
+            options: ["90 degrees", "180 degrees", "270 degrees", "360 degrees"],
+            answer: "180 degrees"
+          },
+          {
+            question: "How many sides does a pentagon have?",
+            options: ["4", "5", "6", "7"],
+            answer: "5"
+          },
+          {
+            question: "A straight line that touches a circle at only one point is called a:",
+            options: ["Chord", "Secant", "Tangent", "Radius"],
+            answer: "Tangent"
+          },
+          {
+            question: "What is the formula for the area of a rectangle?",
+            options: ["pr²", "½bh", "lw", "s²"],
+            answer: "lw"
+          }
+        ],
+        Calculus: [
+          {
+            question: "Calculus is the study of what?",
+            options: ["Discrete values", "Continuous change", "Static objects", "Finite sums"],
+            answer: "Continuous change"
+          },
+          {
+            question: "Which of these is a major branch of calculus?",
+            options: ["Algebraic Calculus", "Geometric Calculus", "Differential Calculus", "Statistical Calculus"],
+            answer: "Differential Calculus"
+          },
+          {
+            question: "The derivative of a function at a point gives the:",
+            options: ["Area under the curve", "Slope of the tangent line", "Volume of the solid", "Integral of the function"],
+            answer: "Slope of the tangent line"
+          },
+          {
+            question: "What does the integral of a function represent?",
+            options: ["Rate of change", "Instantaneous velocity", "Area under the curve", "Slope of the curve"],
+            answer: "Area under the curve"
+          },
+          {
+            question: "Which symbol represents differentiation in calculus?",
+            options: ["∫", "S", "Δ", "d/dx"],
+            answer: "d/dx"
+          }
+        ],
+        Trigonometry: [
+          {
+            question: "Trigonometry deals with the relationships between the angles and what other part of triangles?",
+            options: ["Areas", "Perimeters", "Sides", "Volumes"],
+            answer: "Sides"
+          },
+          {
+            question: "Which of these is a trigonometric function?",
+            options: ["Logarithm", "Exponent", "Sine", "Factorial"],
+            answer: "Sine"
+          },
+          {
+            question: "In a right-angled triangle, the sine of an angle is the ratio of the length of the opposite side to the length of the:",
+            options: ["Adjacent side", "Hypotenuse", "Base", "Height"],
+            answer: "Hypotenuse"
+          },
+          {
+            question: "What is the value of sin(90°)?",
+            options: ["0", "0.5", "1", "-1"],
+            answer: "1"
+          },
+          {
+            question: "The Pythagorean theorem relates the sides of which type of triangle?",
+            options: ["Equilateral", "Isosceles", "Scalene", "Right-angled"],
+            answer: "Right-angled"
+          }
+        ],
+        Statistics: [
+          {
+            question: "What is the primary purpose of descriptive statistics?",
+            options: ["Making predictions", "Drawing conclusions about a population", "Summarizing and organizing data", "Testing hypotheses"],
+            answer: "Summarizing and organizing data"
+          },
+          {
+            question: "Which measure represents the middle value in a sorted dataset?",
+            options: ["Mean", "Mode", "Median", "Range"],
+            answer: "Median"
+          },
+          {
+            question: "Which type of graph is best for displaying the distribution of a continuous dataset?",
+            options: ["Bar chart", "Pie chart", "Histogram", "Line graph"],
+            answer: "Histogram"
+          },
+          {
+            question: "The sum of all values divided by the number of values gives the:",
+            options: ["Median", "Mode", "Mean", "Standard Deviation"],
+            answer: "Mean"
+          },
+          {
+            question: "What is a sample in statistics?",
+            options: ["The entire group being studied", "A subset of the population", "A single data point", "A statistical error"],
+            answer: "A subset of the population"
+          }
+        ]
+      }
+    };
+
+    // DOM elements
+    const quizSubject = document.getElementById('quizSubject');
+    const quizTopic = document.getElementById('quizTopic');
+    const quizQuestionBox = document.getElementById('quizQuestionBox');
+    const quizQuestion = document.getElementById('quizQuestion');
+    const quizOptions = document.getElementById('quizOptions');
+    const quizNav = document.getElementById('quizNav');
+    const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+    const submitQuizBtn = document.getElementById('submitQuizBtn');
+    const quizResults = document.getElementById('quizResults');
+    const noQuizMessage = document.getElementById('noQuizMessage');
+
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let userAnswers = [];
+
+    function updateTopics() {
+        const subject = quizSubject.value;
+        quizTopic.innerHTML = '';
+        for (let topic in quizContent[subject]) {
+            const option = document.createElement('option');
+            option.value = topic;
+            option.textContent = topic;
+            quizTopic.appendChild(option);
+        }
+        loadQuiz();
+    }
+
+    function loadQuiz() {
+        const subject = quizSubject.value;
+        const topic = quizTopic.value;
+        currentQuestions = quizContent[subject][topic] || [];
+        currentIndex = 0;
+        score = 0;
+        userAnswers = [];
+        quizResults.style.display = 'none';
+        if (currentQuestions.length === 0) {
+            quizQuestionBox.style.display = 'none';
+            quizNav.style.display = 'none';
+            noQuizMessage.style.display = 'block';
+        } else {
+            noQuizMessage.style.display = 'none';
+            quizQuestionBox.style.display = 'block';
+            quizNav.style.display = 'flex';
+            submitQuizBtn.style.display = 'none';
+            showQuestion();
+        }
+    }
+
+    function showQuestion() {
+        const q = currentQuestions[currentIndex];
+        quizQuestion.textContent = `Q${currentIndex + 1}: ${q.question}`;
+        quizOptions.innerHTML = '';
+        q.options.forEach((opt, idx) => {
+            const label = document.createElement('label');
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'quizOption';
+            input.value = opt;
+            if (userAnswers[currentIndex] === opt) input.checked = true;
+            label.appendChild(input);
+            label.appendChild(document.createTextNode(opt));
+            quizOptions.appendChild(label);
+        });
+        nextQuestionBtn.style.display = currentIndex < currentQuestions.length - 1 ? 'inline-block' : 'none';
+        submitQuizBtn.style.display = currentIndex === currentQuestions.length - 1 ? 'inline-block' : 'none';
+    }
+
+    quizSubject.addEventListener('change', updateTopics);
+    quizTopic.addEventListener('change', loadQuiz);
+
+    nextQuestionBtn.addEventListener('click', () => {
+        const selected = document.querySelector('input[name="quizOption"]:checked');
+        if (!selected) {
+            alert('Please select an answer.');
+            return;
+        }
+        userAnswers[currentIndex] = selected.value;
+        currentIndex++;
+        showQuestion();
+    });
+
+    submitQuizBtn.addEventListener('click', () => {
+        const selected = document.querySelector('input[name="quizOption"]:checked');
+        if (!selected) {
+            alert('Please select an answer.');
+            return;
+        }
+        userAnswers[currentIndex] = selected.value;
+        score = 0;
+        currentQuestions.forEach((q, i) => {
+            if (userAnswers[i] === q.answer) score++;
+        });
+        quizResults.textContent = `You scored ${score} out of ${currentQuestions.length}!`;
+        quizResults.style.display = 'block';
+        quizQuestionBox.style.display = 'none';
+        quizNav.style.display = 'none';
+    });
+
+    // Initialize topics and quiz
+    updateTopics();
+    </script>
+</body>
+</html>
+
+

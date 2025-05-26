@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Theory Tutor & Quiz</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .app-container {
+            background: white;
+            width: 100%;
+            max-width: 900px;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+        h1 {
+            font-size: 28px;
+            color: #2c3e50;
+            margin-bottom: 24px;
+            text-align: center;
+        }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 6px; font-weight: 600; }
+        select, input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: #f9f9f9;
+            transition: border 0.3s;
+        }
+        select:focus, input:focus { border-color: #3498db; outline: none; }
+        button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            background-color: #3498db;
+            color: white;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+        button:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .theory-box, .answer-box {
+            margin-top: 20px;
+            padding: 16px;
+            border-radius: 10px;
+            background: #ecf0f1;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .answer-box { background: #d4edda; }
+        .quiz-toggle-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: auto;
+            padding: 8px 15px;
+            background-color: #2ecc71;
+            z-index: 10;
+        }
+        .quiz-toggle-btn:hover { background-color: #27ae60; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 100;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 700px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .close-button {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            cursor: pointer;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .modal .quiz-question-box {
+            background: #f0f8ff;
+            margin-bottom: 15px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .modal .quiz-options label {
+            display: block;
+            margin-bottom: 10px;
+            cursor: pointer;
+            font-size: 17px;
+        }
+        .modal .quiz-options input[type="radio"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+        .modal .quiz-navigation {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal .quiz-navigation button { flex: 1; }
+        .modal .quiz-results {
+            background: #e6ffe6;
+            font-weight: bold;
+            text-align: center;
+            padding: 15px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <h1>🧑‍🏫 AI Theory Tutor</h1>
+        <a href="quiz.html" class="quiz-toggle-btn" id="openQuizBtn">📝 Take Quiz</a>
+        <div class="form-group">
+            <label for="subject">Select Subject</label>
+            <select id="subject">
+                <option value="Physics">Physics</option>
+                <option value="Math">Math</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="topic">Select Topic</label>
+            <select id="topic"></select>
+        </div>
+        <div class="theory-box" id="theory"></div>
+        <div class="form-group">
+            <label for="question">Ask a Question</label>
+            <input type="text" id="question" placeholder="Type your question here...">
+        </div>
+        <button id="askBtn">Ask AI Tutor</button>
+        <div class="answer-box" id="answer" style="display: none;"></div>
+    </div>
+    <div id="quizModal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>📝 Quiz on <span id="quizModalTopic"></span></h2>
+            <div id="quiz" style="display: none;">
+                <div class="quiz-question-box">
+                    <p id="quizQuestion"></p>
+                    <div id="quizOptions" class="quiz-options"></div>
+                </div>
+                <div class="quiz-navigation">
+                    <button id="nextQuestionBtn">Next Question</button>
+                    <button id="submitQuizBtn" style="display: none;">Submit Test</button>
+                </div>
+            </div>
+            <div class="quiz-results" id="quizResults" style="display: none;"></div>
+            <p id="noQuizMessage" style="display: none; text-align: center; color: #e74c3c;">No quiz available for this topic yet.</p>
+        </div>
+    </div>
+    <script>
+        // Subject, topic, and matter data
+        const theoryContent = {
+            Physics: {
+                "Newton's Laws": "Newton's first law states that an object will remain at rest or in uniform motion unless acted upon by a force. Newton's second law defines the relationship between force, mass, and acceleration (F = ma). Newton's third law states that for every action, there is an equal and opposite reaction.",
+                Gravity: "Gravity is a force that attracts two bodies toward each other. Earth’s gravity pulls objects toward its center. The force of gravity depends on the mass of the objects and the distance between them.",
+                Thermodynamics: "Thermodynamics is the study of heat, work, and the associated energy transfers. The first law is the conservation of energy, the second law introduces entropy, and the third law states that entropy approaches zero as temperature approaches absolute zero.",
+                Optics: "Optics is the study of light and how it behaves. It includes the study of reflection, refraction, lenses, and optical instruments.",
+                Electromagnetism: "Electromagnetism is the interaction of electric currents or fields and magnetic fields. It includes the study of electric circuits, magnetic forces, and Maxwell's equations."
+            },
+            Math: {
+                Algebra: "Algebra is a branch of mathematics dealing with symbols and the rules for manipulating those symbols. It includes everything from solving elementary equations to studying abstractions.",
+                Geometry: "Geometry involves the study of shapes, sizes, patterns, and the properties of space. Euclidean geometry is the most common form taught in schools.",
+                Calculus: "Calculus is the study of continuous change. It has two major branches: differential calculus and integral calculus. It is used in a wide range of fields including physics, engineering, and economics.",
+                Trigonometry: "Trigonometry deals with the relationships between the angles and sides of triangles. It uses functions such as sine, cosine, and tangent to study periodic phenomena.",
+                Statistics: "Statistics is the study of data collection, analysis, interpretation, and presentation. It includes descriptive statistics and inferential statistics to draw conclusions from data."
+            }
+        };
+
+        // DOM elements
+        const subjectSelect = document.getElementById('subject');
+        const topicSelect = document.getElementById('topic');
+        const theoryBox = document.getElementById('theory');
+
+        // Populate topics based on selected subject
+        function updateTopics() {
+            const selectedSubject = subjectSelect.value;
+            topicSelect.innerHTML = '';
+            for (let topic in theoryContent[selectedSubject]) {
+                const option = document.createElement('option');
+                option.value = topic;
+                option.textContent = topic;
+                topicSelect.appendChild(option);
+            }
+            updateTheory();
+        }
+
+        // Show theory for selected subject and topic
+        function updateTheory() {
+            const subject = subjectSelect.value;
+            const topic = topicSelect.value;
+            theoryBox.innerHTML = `<b>${topic}:</b> ${theoryContent[subject][topic]}`;
+        }
+
+        // Event listeners for subject/topic change
+        subjectSelect.addEventListener('change', updateTopics);
+        topicSelect.addEventListener('change', updateTheory);
+
+        // Initialize topics and theory on page load
+        updateTopics();
+
+        // --- AI Tutor Button Logic ---
+        const askBtn = document.getElementById('askBtn');
+        const answerBox = document.getElementById('answer');
+        const questionInput = document.getElementById('question');
+
+        // Change this to your deployed backend endpoint!
+        const groqEndpoint = "http://localhost:3000/groq";
+        const groqApiKey = "YOUR_GROQ_API_KEY"; // Replace with your real key
+
+        async function groqAiSendMessage(prompt, context = "") {
+            try {
+                const response = await fetch(groqEndpoint, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${groqApiKey}`
+                    },
+                    body: JSON.stringify({
+                        model: "meta-llama/llama-4-scout-17b-16e-instruct",
+                        messages: [
+                            { role: "system", content: context },
+                            { role: "user", content: prompt }
+                        ]
+                    })
+                });
+                const data = await response.json();
+                if (data && data.choices && data.choices.length > 0) {
+                    return data.choices[0].message.content.trim();
+                }
+                return "No response from AI.";
+            } catch (err) {
+                return "Error contacting Groq AI: " + err.message;
+            }
+        }
+
+        askBtn.addEventListener('click', async () => {
+            const question = questionInput.value.trim();
+            if (!question) return;
+
+            askBtn.disabled = true;
+            askBtn.textContent = 'Thinking...';
+            answerBox.style.display = 'none';
+
+            // Use the current theory as context
+            const context = theoryBox.textContent || "";
+
+            const reply = await groqAiSendMessage(question, context);
+
+            answerBox.textContent = `Answer: ${reply}`;
+            answerBox.style.display = 'block';
+            askBtn.disabled = false;
+            askBtn.textContent = 'Ask AI Tutor';
+        });
+    </script>
+</body>
+</html>
